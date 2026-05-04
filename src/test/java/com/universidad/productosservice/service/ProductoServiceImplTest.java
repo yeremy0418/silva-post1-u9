@@ -108,4 +108,36 @@ class ProductoServiceImplTest {
         verify(productoRepository, times(1)).deleteById(1L);
         verify(productoRepository, times(1)).findById(1L);
     }
+
+    @Test
+    void actualizarStock_datosValidos_actualizaYGuarda() {
+        Producto producto = new Producto(1L, "Monitor", 900.0, 3);
+
+        when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+        when(productoRepository.save(any(Producto.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Producto resultado = productoService.actualizarStock(1L, 7);
+
+        assertEquals(7, resultado.getStock());
+        verify(productoRepository, times(1)).findById(1L);
+        verify(productoRepository, times(1)).save(any(Producto.class));
+    }
+
+    @Test
+    void actualizarStock_negativo_lanzaIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> productoService.actualizarStock(1L, -1));
+        verifyNoInteractions(productoRepository);
+    }
+
+    @Test
+    void eliminar_productoNoExistente_lanzaRuntimeException() {
+        when(productoRepository.findById(10L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class,
+                () -> productoService.eliminar(10L));
+
+        verify(productoRepository, times(1)).findById(10L);
+        verify(productoRepository, never()).deleteById(anyLong());
+    }
 }

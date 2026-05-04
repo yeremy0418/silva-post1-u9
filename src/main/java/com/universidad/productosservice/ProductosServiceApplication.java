@@ -7,6 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ProductosServiceApplication {
 
     public static void main(String[] args) {
-        // Código aquí
+        SpringApplication.run(ProductosServiceApplication.class, args);
     }
 }
