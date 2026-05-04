@@ -4,6 +4,9 @@ import com.universidad.productosservice.domain.Producto;
 import com.universidad.productosservice.repository.ProductoRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -46,5 +49,29 @@ class ProductoServiceImplTest {
 
         assertEquals("Mouse", resultado.getNombre());
         assertEquals(50.0, resultado.getPrecio());
+    }
+
+    @Test
+    void buscarPorId_noExistente_lanzaRuntimeException() {
+        when(productoRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class,
+                () -> productoService.buscarPorId(99L));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void crear_nombreInvalido_lanzaIllegalArgumentException(String nombre) {
+        assertThrows(IllegalArgumentException.class,
+                () -> productoService.crear(nombre, 100.0, 5));
+        verifyNoInteractions(productoRepository);
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {0.0, -1.0, -100.0, -0.01})
+    void crear_precioInvalido_lanzaIllegalArgumentException(double precio) {
+        assertThrows(IllegalArgumentException.class,
+                () -> productoService.crear("Producto", precio, 5));
+        verifyNoInteractions(productoRepository);
     }
 }
